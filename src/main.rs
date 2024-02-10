@@ -3,17 +3,41 @@ use glfw::*;
 fn main() {
     let (mut glfw, mut window, events) = create_window_context();
 
+    const TARGET_FPS: f64 = 60.;
+    const OPTIMAL_TIME: f64 = 1. / TARGET_FPS;
+    let mut start = glfw.get_time();
+    let mut end;
+    let mut delta = 0.;
+
+    let mut timer = start;
+    let mut fps: u8 = 0;
+
     window.show();
 
     'main: loop {
-        glfw.poll_events();
-        for (_, event) in flush_messages(&events) {
-            match event {
-                WindowEvent::Close => break 'main,
-                _ => println!("WHATHELL?!?!?!?!?!"),
+        end = start;
+        start = glfw.get_time();
+        delta += start - end;
+
+        if delta >= OPTIMAL_TIME {
+            glfw.poll_events();
+            for (_, event) in flush_messages(&events) {
+                match event {
+                    WindowEvent::Close => break 'main,
+                    _ => println!("WHATHELL?!?!?!?!?!"),
+                }
             }
+            window.swap_buffers();
+
+            delta -= OPTIMAL_TIME;
+            fps += 1;
         }
-        window.swap_buffers();
+
+        if timer - start >= 1. {
+            println!("FPS: {fps}");
+            timer += 1.;
+            fps = 0;
+        }
     }
 }
 
